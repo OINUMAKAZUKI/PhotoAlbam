@@ -10,6 +10,7 @@ import java.util.List;
 
 import photoalbam.namanuma.com.myapplication.R;
 import photoalbam.namanuma.com.myapplication.model.PhotoCard;
+import photoalbam.namanuma.com.myapplication.util.BitmapUtils;
 import photoalbam.namanuma.com.myapplication.view.SquareImageView;
 
 /**
@@ -41,7 +42,7 @@ public class PhotoCardRecyclerAdapter extends RecyclerView.Adapter<PhotoCardRecy
     @Override
     public void onBindViewHolder(PhotoCardRecyclerAdapter.ViewHolder holder, int position) {
         final PhotoCard item = mList.get(position);
-        holder.imageView.setImageBitmap(item.getBitmap());
+        holder.imageView.setImageBitmap(BitmapUtils.toBitmap(item.getBitmap()));
         // クリック処理
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override

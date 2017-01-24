@@ -18,11 +18,12 @@ import android.view.MenuItem;
 import android.view.View;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
+import io.realm.Realm;
+import io.realm.RealmConfiguration;
 import photoalbam.namanuma.com.myapplication.adapter.PhotoCardRecyclerAdapter;
 import photoalbam.namanuma.com.myapplication.model.PhotoCard;
+import photoalbam.namanuma.com.myapplication.util.BitmapUtils;
 
 public class ScrollingActivity extends AppCompatActivity {
 
@@ -30,7 +31,6 @@ public class ScrollingActivity extends AppCompatActivity {
 
     RecyclerView mRecyclerView = null;
     PhotoCardRecyclerAdapter mPhotoCardRecyclerAdapter = null;
-    List<PhotoCard> mPhotoCardList = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,7 +39,10 @@ public class ScrollingActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        mPhotoCardList = new ArrayList<>();
+        RealmConfiguration realmConfig = new RealmConfiguration.Builder(this).build();
+        Realm.setDefaultConfiguration(realmConfig);
+
+        Realm realm = Realm.getDefaultInstance();
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             findViewById(android.R.id.content).setSystemUiVisibility(
@@ -63,7 +66,7 @@ public class ScrollingActivity extends AppCompatActivity {
 
         mRecyclerView = (RecyclerView) findViewById(R.id.recyclerView);
         mRecyclerView.setLayoutManager(new GridLayoutManager(this, 2));
-        mPhotoCardRecyclerAdapter = new PhotoCardRecyclerAdapter(this, mPhotoCardList, mOnRecyclerListener(this));
+        mPhotoCardRecyclerAdapter = new PhotoCardRecyclerAdapter(this, realm.where(PhotoCard.class).findAll(), mOnRecyclerListener(this));
         mRecyclerView.setAdapter(mPhotoCardRecyclerAdapter);
     }
 
@@ -98,9 +101,24 @@ public class ScrollingActivity extends AppCompatActivity {
                 uri = data.getData();
                 try {
                     Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
+
+                    Realm realm = Realm.getDefaultInstance();
+
+                    Number number = realm.where(PhotoCard.class).max("id");
+                    int id = 0;
+                    if(number != null) {
+                        id = number.intValue() + 1;
+                    }
+
                     PhotoCard photoCard = new PhotoCard();
-                    photoCard.setBitmap(bitmap);
-                    mPhotoCardList.add(photoCard);
+                    photoCard.setBitmap(BitmapUtils.toString(bitmap));
+                    photoCard.setId(id);
+
+                    realm.beginTransaction();
+                    realm.copyToRealm(photoCard);
+                    realm.commitTransaction();
+                    realm.close();
+
                     mPhotoCardRecyclerAdapter.notifyDataSetChanged();
 
                 } catch (IOException e) {
@@ -109,6 +127,7 @@ public class ScrollingActivity extends AppCompatActivity {
             }
         }
     }
+
 
     public PhotoCardRecyclerAdapter.OnRecyclerListener mOnRecyclerListener(final Context context) {
         return new PhotoCardRecyclerAdapter.OnRecyclerListener() {
