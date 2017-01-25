@@ -1,16 +1,19 @@
 package photoalbam.namanuma.com.myapplication.adapter;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.net.Uri;
+import android.provider.MediaStore;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import java.io.IOException;
 import java.util.List;
 
 import photoalbam.namanuma.com.myapplication.R;
 import photoalbam.namanuma.com.myapplication.model.PhotoCard;
-import photoalbam.namanuma.com.myapplication.util.BitmapUtils;
 import photoalbam.namanuma.com.myapplication.view.SquareImageView;
 
 /**
@@ -42,7 +45,15 @@ public class PhotoCardRecyclerAdapter extends RecyclerView.Adapter<PhotoCardRecy
     @Override
     public void onBindViewHolder(PhotoCardRecyclerAdapter.ViewHolder holder, int position) {
         final PhotoCard item = mList.get(position);
-        holder.imageView.setImageBitmap(BitmapUtils.toBitmap(item.getBitmap()));
+
+        Uri uri = Uri.parse(item.getUriString());
+        try {
+            Bitmap bitmap = MediaStore.Images.Media.getBitmap(mContext.getContentResolver(), uri);
+            holder.imageView.setImageBitmap(bitmap);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         // クリック処理
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override

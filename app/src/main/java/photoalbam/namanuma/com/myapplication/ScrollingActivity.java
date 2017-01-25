@@ -2,11 +2,9 @@ package photoalbam.namanuma.com.myapplication;
 
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
@@ -17,13 +15,12 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
-import java.io.IOException;
-
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
 import photoalbam.namanuma.com.myapplication.adapter.PhotoCardRecyclerAdapter;
 import photoalbam.namanuma.com.myapplication.model.PhotoCard;
-import photoalbam.namanuma.com.myapplication.util.BitmapUtils;
+
+import static photoalbam.namanuma.com.myapplication.ShowImageViewActivity.INTENT_PHOTO_ID;
 
 public class ScrollingActivity extends AppCompatActivity {
 
@@ -96,34 +93,26 @@ public class ScrollingActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
 
         if(requestCode == RESULT_PICK_IMAGEFILE) {
-            Uri uri = null;
             if (data != null) {
-                uri = data.getData();
-                try {
-                    Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
+                Uri uri = data.getData();
+                Realm realm = Realm.getDefaultInstance();
 
-                    Realm realm = Realm.getDefaultInstance();
-
-                    Number number = realm.where(PhotoCard.class).max("id");
-                    int id = 0;
-                    if(number != null) {
-                        id = number.intValue() + 1;
-                    }
-
-                    PhotoCard photoCard = new PhotoCard();
-                    photoCard.setBitmap(BitmapUtils.toString(bitmap));
-                    photoCard.setId(id);
-
-                    realm.beginTransaction();
-                    realm.copyToRealm(photoCard);
-                    realm.commitTransaction();
-                    realm.close();
-
-                    mPhotoCardRecyclerAdapter.notifyDataSetChanged();
-
-                } catch (IOException e) {
-                    e.printStackTrace();
+                Number number = realm.where(PhotoCard.class).max("id");
+                int id = 0;
+                if(number != null) {
+                    id = number.intValue() + 1;
                 }
+
+                PhotoCard photoCard = new PhotoCard();
+                photoCard.setId(id);
+                photoCard.setUriString(uri.toString());
+
+                realm.beginTransaction();
+                realm.copyToRealm(photoCard);
+                realm.commitTransaction();
+                realm.close();
+
+                mPhotoCardRecyclerAdapter.notifyDataSetChanged();
             }
         }
     }
@@ -134,8 +123,7 @@ public class ScrollingActivity extends AppCompatActivity {
             @Override
             public void onClicked(PhotoCard object) {
                 Intent intent = new Intent(context, ShowImageViewActivity.class);
-                intent.putExtra(ShowImageViewActivity.INTENT_TITLE, object.getTitle());
-                intent.putExtra(ShowImageViewActivity.INTENT_BITMAP, object.getBitmap());
+                intent.putExtra(INTENT_PHOTO_ID, object.getId());
                 startActivity(intent);
             }
         };

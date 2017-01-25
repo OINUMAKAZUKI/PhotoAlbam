@@ -11,7 +11,7 @@ public class PhotoCard extends RealmObject {
     @PrimaryKey
     private int id;
     private String title;
-    private String bitmap;
+    private String uriString;
 
     public void setId(int id) {
         this.id = id;
@@ -21,8 +21,8 @@ public class PhotoCard extends RealmObject {
         this.title = title;
     }
 
-    public void setBitmap(String bitmap) {
-        this.bitmap = bitmap;
+    public String getUriString() {
+        return uriString;
     }
 
     public int getId() {
@@ -33,7 +33,7 @@ public class PhotoCard extends RealmObject {
         return title;
     }
 
-    public String getBitmap() {
-        return bitmap;
+    public void setUriString(String uriString) {
+        this.uriString = uriString;
     }
 }
