@@ -1,15 +1,14 @@
 package photoalbam.namanuma.com.myapplication.adapter;
 
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.net.Uri;
-import android.provider.MediaStore;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import java.io.IOException;
+import com.bumptech.glide.Glide;
+
 import java.util.List;
 
 import photoalbam.namanuma.com.myapplication.R;
@@ -47,12 +46,7 @@ public class PhotoCardRecyclerAdapter extends RecyclerView.Adapter<PhotoCardRecy
         final PhotoCard item = mList.get(position);
 
         Uri uri = Uri.parse(item.getUriString());
-        try {
-            Bitmap bitmap = MediaStore.Images.Media.getBitmap(mContext.getContentResolver(), uri);
-            holder.imageView.setImageBitmap(bitmap);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        Glide.with(mContext).load(uri).into(holder.imageView);
 
         // クリック処理
         holder.itemView.setOnClickListener(new View.OnClickListener() {

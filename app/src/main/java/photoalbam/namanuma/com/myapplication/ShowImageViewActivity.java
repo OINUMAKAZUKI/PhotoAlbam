@@ -1,15 +1,13 @@
 package photoalbam.namanuma.com.myapplication;
 
-import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.widget.ImageView;
 
-import java.io.IOException;
+import com.bumptech.glide.Glide;
 
 import io.realm.Realm;
 import photoalbam.namanuma.com.myapplication.model.PhotoCard;
@@ -40,21 +38,14 @@ public class ShowImageViewActivity extends AppCompatActivity {
         PhotoCard photo = realm.where(PhotoCard.class).equalTo("id", id).findFirst();
         realm.close();
 
-        Uri uri = Uri.parse(photo.getUriString());
-        Bitmap bitmap = null;
-        try {
-            bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
 
         getSupportActionBar().setTitle("選択したタイトルまたは日付");
 
+        Uri uri = Uri.parse(photo.getUriString());
+
         mImageView = (ImageView) findViewById(R.id.imageView);
 
-        if (bitmap != null) {
-            mImageView.setImageBitmap(bitmap);
-        }
+        Glide.with(this).load(uri).into(mImageView);
     }
 
     @Override
